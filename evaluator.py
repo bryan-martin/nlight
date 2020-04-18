@@ -6,7 +6,7 @@ Implement base objects for parsing arithmetic expressions
         return calculation
 
 From reading it appears that implementing various grammars can be accomplished by building up
-various machinery that operates on the current token while looking ahead at the next token.
+machinery that operates on the current token while looking ahead at the next token.
 The base class should contain tokenstr->current, tokenstr->next, a method to move along the tokens,
 and a method to check the type of the next token
 """
