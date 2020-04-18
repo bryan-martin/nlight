@@ -23,3 +23,14 @@
 [Recursive-Descent](https://rockie-yang.gitbooks.io/python-cookbook/ch2/simple_parser.html)
 
 [Generating Arithmetic Expressions](https://stackoverflow.com/questions/6881170/is-there-a-way-to-autogenerate-valid-arithmetic-expressions)
+
+## Testing
+generator.py contains methods for generating different test inputs and writing to file. There are also methods to generate truth data for a corresponding expression using the 'calc' command line utility.
+
+The test/ directory contains test input files containing generated expressions for different testcases and the corresponding truth data.
+
+pytest is used as the testing framework and runs against the test_*.py files in the test/ directory.
+
+### Example output
+
+![pytest](pytest.gif)
