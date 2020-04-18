@@ -83,11 +83,8 @@ def generate_tokens(pattern, text):
 ##################################
 class EvaluatorBase(object):
     """
-    Use the ._accept() method to test and accept look ahead token.
-    Use the ._expect() method to exactly match and discard the next token on the input.
-        or raise a SyntaxError if it doesn't match
+    Base class for implementing different grammar parsers
     """
-
     def __init__(self, text):
         self.tokens = generate_tokens(master_pattern, text)
         self.current_token = None
@@ -95,15 +92,14 @@ class EvaluatorBase(object):
         self._advance()
 
     def evaluate(self):
-        # expr is the top level grammar. So we invoke that first.
-        # it will invoke other function to consume tokens according to grammar rule.
+        """call top level non-terminal"""
         return self.expr()
 
     def _advance(self):
         self.current_token, self.next_token = self.next_token, next(self.tokens, None)
 
     def _accept(self, token_type):
-        # if there is next token and token type matches
+        """method to test and accept look ahead token."""
         if self.next_token and self.next_token.type == token_type:
             self._advance()
             return True
@@ -111,58 +107,32 @@ class EvaluatorBase(object):
             return False
 
     def _expect(self, token_type):
+        """method to exactly match and discard the next token on the input."""
         if not self._accept(token_type):
             raise SyntaxError("Expected " + token_type)
+
+    def expr(self):
+        raise NotImplementedError
 
 
 class RecursiveDescentEvaluator(EvaluatorBase):
     """
     Implementation of a recursive descent parser.
 
-    Each method implement a single grammar rule.
+    Each method implements a single grammar rule.
     It walks from left to right over grammar rule.
-    It either consume the rule a generate a syntax error
+    It will either consume the rule a generate a syntax error
+
+        BNF grammar expr ::= expr + term | expr - term | term
+                    term ::= term * factor | term / factor | factor
+                    factor::= (expr) | NUM
     """
-
-    def __init__(self, text):
-        self.tokens = generate_tokens(master_pattern, text)
-        self.current_token = None
-        self.next_token = None
-        self._advance()
-
-    def evaluate(self):
-        # expr is the top level grammar. So we invoke that first.
-        # it will invoke other function to consume tokens according to grammar rule.
-        return self.expr()
-
-    def _advance(self):
-        self.current_token, self.next_token = self.next_token, next(self.tokens, None)
-
-    def _accept(self, token_type):
-        # if there is next token and token type matches
-        if self.next_token and self.next_token.type == token_type:
-            self._advance()
-            return True
-        else:
-            return False
-
-    def _expect(self, token_type):
-        if not self._accept(token_type):
-            raise SyntaxError("Expected " + token_type)
-
     def expr(self):
         """
-        expression ::= term { ( +|-) term } *
+        expr ::= expr + term | expr - term | term
         """
-
-        # it first expect a term according to grammar rule
         expr_value = self.term()
-
-        # then if it's either + or -, we try to consume the right side
-        #
-        # If it's not + or -, then it is treated as no right side
         while any([self._accept(operator) for operator in PRECEDENCE[1]]):
-            # get the operation, + or -
             op = PRECEDENCE[1][self.current_token.type]
             right = self.term()
             expr_value = op.perform(expr_value, right)
@@ -170,15 +140,9 @@ class RecursiveDescentEvaluator(EvaluatorBase):
 
     def term(self):
         """
-        term    ::= factor { ('*'|'/') factor } *
+        term ::= term * factor | term / factor | factor
         """
-
-        # it first expect a factor
         term_value = self.factor()
-
-        # then if it's either * or /, we try to consume the right side
-        #
-        # If it's not + or -, then it is treated as no right side
         while any([self._accept(operator) for operator in PRECEDENCE[2]]):
             op = PRECEDENCE[2][self.current_token.type]
             term_value = op.perform(term_value, self.factor())
@@ -186,27 +150,16 @@ class RecursiveDescentEvaluator(EvaluatorBase):
 
     def factor(self):
         """
-        factor  ::= NUM | (expr)
-
+        factor::= (expr) | NUM
         """
-
-        # it can be a number
         if self._accept("Number"):
             return int(self.current_token.value)
-        # or (expr)
         elif self._accept("Lparen"):
-            # we consumed ( in previous _accept
-            #
-            # then we try to evaluate the expr, and store the value
             expr_value = self.expr()
-
-            # then it should be ), otherwise raise an exception
             self._expect("Rparen")
-
-            # return the previous saved value
             return expr_value
         else:
-            raise SyntaxError("Expect NUMBER or LPAREN")
+            raise SyntaxError("Expect Number or Lparen but got {}".format(self.current_token.value))
 
 
 def calc(expr, evaluator_class=RecursiveDescentEvaluator):
