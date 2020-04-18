@@ -37,13 +37,13 @@ test_input, truth_data = load_op_inputs('random', '+')
 @pytest.mark.parametrize("expr_rand_plus,truth_rand_plus", zip(test_input, truth_data))
 def test_recursive_descent_random_plus(expr_rand_plus, truth_rand_plus):
     answer = evaluator.calc(expr_rand_plus, evaluator_class=evaluator.RecursiveDescentEvaluator)
-    assert answer == truth_rand_plus
+    assert abs(answer - truth_rand_plus) < 0.0000001
 
 test_input, truth_data = load_op_inputs('random', '-')
 @pytest.mark.parametrize("expr_rand_minus,truth_rand_minus", zip(test_input, truth_data))
 def test_recursive_descent_random_minus(expr_rand_minus, truth_rand_minus):
     answer = evaluator.calc(expr_rand_minus, evaluator_class=evaluator.RecursiveDescentEvaluator)
-    assert answer == truth_rand_minus
+    assert abs(answer - truth_rand_minus) < 0.0000001
 
 test_input, truth_data = load_op_inputs('random', '*')
 @pytest.mark.parametrize("expr_rand_mult,truth_rand_mult", zip(test_input, truth_data))
