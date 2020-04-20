@@ -123,13 +123,13 @@ class RecursiveDescentEvaluator(EvaluatorBase):
     It walks from left to right over grammar rule.
     It will either consume the rule a generate a syntax error
 
-        BNF grammar expr ::= expr + term | expr - term | term
-                    term ::= term * factor | term / factor | factor
-                    factor::= (expr) | NUM
+        BNF grammar expr ::= term | term + expr | term - expr
+                    term ::= factor | factor * term | factor / term
+                    factor::= NUM | (expr)
     """
     def expr(self):
         """
-        expr ::= expr + term | expr - term | term
+        expr ::= term | term + expr | term - expr
         """
         expr_value = self.term()
         while any([self._accept(operator) for operator in PRECEDENCE[1]]):
@@ -140,7 +140,7 @@ class RecursiveDescentEvaluator(EvaluatorBase):
 
     def term(self):
         """
-        term ::= term * factor | term / factor | factor
+        term ::= factor | factor * term | factor / term
         """
         term_value = self.factor()
         while any([self._accept(operator) for operator in PRECEDENCE[2]]):
@@ -150,7 +150,7 @@ class RecursiveDescentEvaluator(EvaluatorBase):
 
     def factor(self):
         """
-        factor::= (expr) | NUM
+        factor::= NUM | (expr)
         """
         if self._accept("Number"):
             return int(self.current_token.value)
