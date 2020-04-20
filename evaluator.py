@@ -18,6 +18,18 @@ import collections
 ###           OPERATORS        ###
 ##################################
 class OperatorBase(object):
+    """
+    This base class allows for registering the char associated with the operator or the "symbol"
+    as well as the regex string to match it. Overwrite perform() to implement the operator execution
+    How to implement:
+        op.perform() is going to be called by evaluator methods. To implement perform correctly,
+        associativity of the operator needs to be understood. "+" and "*" are associative. This means
+        a*b*c == (a*b)*c == a*(b*c), left, right, either is correct. This is the property of associativity.
+        "-" and "/" on the other hand are inherently left-associative. These operators are non-associative and
+        enjoy only notional associativity. Therefore a-b-c == (a-b)-c != a-(b-c).
+        The op.perform() method is called with a left and a right positional arguement. If operator is
+        left, associative, these must be "switched". See implementation of Minus and Divide
+    """
     def __init__(self, symbol, regex):
         self.symbol = symbol
         self.regex = regex
@@ -28,22 +40,24 @@ class OperatorBase(object):
 
 class Plus(OperatorBase):
     def perform(self, *args):
+        """called as Plus.perform(left, right)"""
         return args[0] + args[1]
 
 
 class Minus(OperatorBase):
-    #TODO:  Why are these swapped? Associativity?
     def perform(self, *args):
+        """inherently left-associative. Therefore (right - left) is correct"""
         return args[1] - args[0]
 
 
 class Multiply(OperatorBase):
     def perform(self, *args):
+        """called as Multiply.perform(left, right)"""
         return args[0] * args[1]
 
 
 class Divide(OperatorBase):
-    #TODO:  Why are these swapped? Associativity?
+    """inherently left-associative. Therefore (right / left) is correct"""
     def perform(self, *args):
         return args[1] / args[0]
 
