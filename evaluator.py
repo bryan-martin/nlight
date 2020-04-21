@@ -73,24 +73,34 @@ OPERATOR_REGEX = [
     op.regex for precedence in PRECEDENCE.values() for op in precedence.values()
 ]
 
-Number = r"(?P<Number>\d+)"
+Number = r"(?P<Number>\d+(\.\d*)?)"
 Lparen = r"(?P<Lparen>\()"
 Rparen = r"(?P<Rparen>\))"
+MISMATCH = r"(?P<Mismatch>.)"
 FACTORS = [Number, Lparen, Rparen]
-master_pattern = re.compile("|".join(OPERATOR_REGEX + FACTORS))
+master_pattern = re.compile("|".join(OPERATOR_REGEX + FACTORS + [MISMATCH]))
 
 
 ##################################
 ###           LEXER            ###
 ##################################
+class LexicalError(Exception):
+    """custom error handling for lexer errors"""
+
+
 Token = collections.namedtuple("Token", ["type", "value"])
 
 
 def generate_tokens(pattern, text):
     text = text.replace(" ", "")
-    scanner = pattern.scanner(text)
-    for m in iter(scanner.match, None):
-        token = Token(m.lastgroup, m.group())
+    for match_obj in master_pattern.finditer(text):
+        token_type = match_obj.lastgroup
+        value = match_obj.group()
+        if token_type == "Number":
+            value = float(value) if '.' in value else int(value)
+        elif token_type == "Mismatch":
+            raise LexicalError("{} is not a valid symbol".format(value))
+        token = Token(token_type, value)
         yield token
 
 
@@ -193,7 +203,7 @@ class RecursiveDescentEvaluator(EvaluatorBase):
         Also terminate recursion or SyntaxError here.
         """
         if self._accept("Number"):
-            return int(self.current_token.value)  # factor ::= NUM
+            return float(self.current_token.value)  # factor ::= NUM
         # This statement is breaking down factor ::= "(" expr ")"
         elif self._accept("Lparen"):
             expr_value = self.expr()   # This terminates the recursion
