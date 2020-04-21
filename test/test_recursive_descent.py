@@ -19,7 +19,7 @@ test_input, truth_data = load_op_inputs('binary', '*')
 @pytest.mark.parametrize("expr_bin_mult,truth_bin_mult", zip(test_input, truth_data))
 def test_recursive_descent_binary_mult(expr_bin_mult, truth_bin_mult):
     answer = evaluator.calc(expr_bin_mult, evaluator_class=evaluator.RecursiveDescentEvaluator)
-    assert abs(answer - truth_bin_mult) < 0.0000001
+    assert (abs(answer - truth_bin_mult) / truth_bin_mult) < 0.000000000001
 
 test_input, truth_data = load_op_inputs('binary', '/')
 @pytest.mark.parametrize("expr_bin_div,truth_bin_div", zip(test_input, truth_data))

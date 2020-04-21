@@ -210,7 +210,10 @@ class RecursiveDescentEvaluator(EvaluatorBase):
             self._expect("Rparen")
             return expr_value
         else:
-            raise SyntaxError("Expect Number or Lparen but got {}".format(self.current_token.value))
+            if self.current_token:
+                raise SyntaxError("Expect Number or Lparen but got {}".format(self.current_token.value))
+            elif self.next_token:  # required if the very first token in syntactically incorrect.
+                raise SyntaxError("Expect Number or Lparen but got {}".format(self.next_token.value))
 
 
 def calc(expr, evaluator_class=RecursiveDescentEvaluator):
