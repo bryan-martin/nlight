@@ -1,5 +1,10 @@
 # nlight
 
+## Usage:
+Clone or download the project and navigate to the "nlight" directory.
+- To run the evaluator program run `python -m evaluator 1+1`
+- To run the tests you will need to install dependencies. You can do so by running `pip install dist\evaluator-0.0.0-py3-none-any.whl`
+- Tests can be run with `python -m pytest`
 
 ## The Technical Problem
 
