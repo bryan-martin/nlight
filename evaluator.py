@@ -12,7 +12,7 @@ and a method to check the type of the next token
 """
 import re
 import collections
-
+import argparse
 
 ##################################
 ###           OPERATORS        ###
@@ -222,3 +222,12 @@ def calc(expr, evaluator_class=RecursiveDescentEvaluator):
     """
     e = evaluator_class(expr)
     return e.evaluate()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="A simple calculator for mathematical expressions. Supports operators +-/*")
+    parser.add_argument('expression', nargs='+', help="Expression to evaluate")
+    expression = ''.join(parser.parse_args().expression)
+    res = calc(expression)
+    print(res)
